@@ -20,6 +20,8 @@ from ..data.dexscreener import DexScreenerLookup
 from ..data.helius import HeliusDataSource
 from ..exec.jupiter import JupiterExecutor
 from ..exec.paper import PaperExecutor
+from ..exec.senders import RpcSender
+from ..exec.signers import ExternalSigner, KeypairSigner
 from ..filters.basic import BasicFilter
 from ..filters.rug_heuristics import RugHeuristicsFilter
 from ..persist.storage import SQLiteStorage
@@ -43,6 +45,11 @@ class TradingPipeline:
         """Initialize trading pipeline with assembled components."""
         self.settings = settings
         self.running = False
+
+        # Validate safety settings before assembly
+        if not settings.dry_run:
+            self._validate_live_trading_safety(settings)
+
         self.components = self._assemble(settings)
 
         logger.info(
@@ -50,6 +57,53 @@ class TradingPipeline:
             dry_run=settings.dry_run,
             data_sources=len(self.components["data_sources"]),
             filters=len(self.components["filters"]),
+        )
+
+    def _validate_live_trading_safety(self, settings: AppSettings) -> None:
+        """Validate safety settings for live trading.
+
+        Args:
+            settings: Application settings
+
+        Raises:
+            ValueError: If safety checks fail
+        """
+        # Check for localhost/devnet RPC
+        if "localhost" in settings.rpc_url or "127.0.0.1" in settings.rpc_url:
+            if not settings.allow_devnet:
+                raise ValueError(
+                    f"Live trading on localhost/devnet is not allowed. "
+                    f"RPC URL: {settings.rpc_url}. "
+                    f"Set allow_devnet=true to override (UNSAFE)."
+                )
+            logger.warning("Live trading on localhost/devnet enabled (UNSAFE)")
+
+        # Check position size vs daily loss limit
+        if settings.position_size_usd > settings.daily_max_loss_usd:
+            raise ValueError(
+                f"Position size ({settings.position_size_usd}) cannot exceed "
+                f"daily max loss ({settings.daily_max_loss_usd}). "
+                f"This would allow losing more than the daily limit in a single trade."
+            )
+
+        # Check slippage limits
+        if settings.max_slippage_bps > 1000:  # 10%
+            if not settings.unsafe_allow_high_slippage:
+                raise ValueError(
+                    f"Slippage {settings.max_slippage_bps} bps ({settings.max_slippage_bps / 100}%) "
+                    f"exceeds 10% limit. Set unsafe_allow_high_slippage=true to override (UNSAFE)."
+                )
+            logger.warning(
+                f"High slippage {settings.max_slippage_bps} bps enabled (UNSAFE)"
+            )
+
+        # Log live trading banner
+        logger.critical(
+            "🚨 LIVE TRADING MODE ENABLED 🚨",
+            rpc_url=settings.rpc_url,
+            position_size_usd=settings.position_size_usd,
+            daily_max_loss_usd=settings.daily_max_loss_usd,
+            max_slippage_bps=settings.max_slippage_bps,
         )
 
     def _assemble(self, settings: AppSettings) -> dict[str, Any]:
@@ -107,6 +161,10 @@ class TradingPipeline:
             )
             logger.info("Using paper executor (dry run mode)")
         else:
+            # Live trading - need signer and sender
+            signer = self._create_signer(settings)
+            sender = RpcSender(rpc_url=settings.rpc_url)
+
             components["exec_client"] = JupiterExecutor(
                 base_url=settings.jupiter_base,
                 rpc_url=settings.rpc_url,
@@ -114,6 +172,20 @@ class TradingPipeline:
                 priority_fee_microlamports=settings.priority_fee_microlamports,
                 compute_unit_limit=settings.compute_unit_limit,
                 jito_tip_lamports=settings.jito_tip_lamports,
+                signer=signer,
+                sender=sender,
+                enable_preflight=settings.preflight_simulate,
+                tip_account_b58=settings.tip_account_b58,
+            )
+
+            # Log public key for live trading
+            pubkey = signer.pubkey_base58()
+            logger.critical(
+                "🔑 LIVE TRADING CONFIGURED 🔑",
+                public_key=pubkey,
+                rpc_url=settings.rpc_url,
+                preflight_simulate=settings.preflight_simulate,
+                max_retries=settings.max_retries_send,
             )
             logger.info("Using Jupiter executor (live mode)")
 
@@ -137,6 +209,53 @@ class TradingPipeline:
         logger.info("Initialized SQLite storage")
 
         return components
+
+    def _create_signer(self, settings: AppSettings) -> KeypairSigner | ExternalSigner:
+        """Create a transaction signer for live trading.
+
+        Args:
+            settings: Application settings
+
+        Returns:
+            Configured signer instance
+
+        Raises:
+            ValueError: If no valid signer configuration is found
+        """
+        # Try KeypairSigner first (preferred)
+        try:
+            # Check for encrypted keypair file
+            if hasattr(settings, "keypair_path_enc") and settings.keypair_path_enc:
+                return KeypairSigner.from_encrypted_file(settings.keypair_path_enc)
+
+            # Check for base58 secret key in environment
+            if hasattr(settings, "solana_sk_b58") and settings.solana_sk_b58:
+                return KeypairSigner.from_base58_secret(settings.solana_sk_b58)
+
+            # Check for JSON keypair file
+            if hasattr(settings, "keypair_path_json") and settings.keypair_path_json:
+                return KeypairSigner.from_json_file(settings.keypair_path_json)
+
+        except Exception as e:
+            logger.warning("Failed to create KeypairSigner", error=str(e))
+
+        # Try ExternalSigner as fallback
+        try:
+            if (
+                hasattr(settings, "external_signer_command")
+                and settings.external_signer_command
+            ):
+                return ExternalSigner(
+                    command=settings.external_signer_command,
+                    timeout_seconds=getattr(settings, "external_signer_timeout", 30),
+                )
+        except Exception as e:
+            logger.warning("Failed to create ExternalSigner", error=str(e))
+
+        raise ValueError(
+            "No valid signer configuration found for live trading. "
+            "Configure one of: keypair_path_enc, solana_sk_b58, keypair_path_json, or external_signer_command"
+        )
 
     async def run_once(self) -> None:
         """Execute one trading cycle."""

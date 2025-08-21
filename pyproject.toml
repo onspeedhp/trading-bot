@@ -25,9 +25,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-solana = [
+live = [
     "solders==0.20.*",
     "solana==0.30.*",
+    "base58==2.1.*",
+    "pynacl==1.5.*",
+    # Note: These packages may conflict with httpx version requirements
+    # You may need to manually resolve dependencies or use a separate environment
 ]
 
 [project.scripts]

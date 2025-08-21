@@ -1,5 +1,5 @@
-# Production configuration
-# Used for live trading - USE WITH EXTREME CAUTION
+# Minimal test configuration for live trading validation
+# USE WITH EXTREME CAUTION - REAL MONEY TRADING
 
 # Environment
 env: 'prod'
@@ -12,28 +12,28 @@ dexscreener_base: 'https://api.dexscreener.com/latest/dex'
 jupiter_base: 'https://quote-api.jup.ag/v6'
 gmgn_base: null # Optional GMGN API for additional data
 
-# Transaction settings (optimized for production)
-priority_fee_microlamports: 20000 # example - adjust based on network conditions
+# Transaction settings (minimal for testing)
+priority_fee_microlamports: 10000 # Conservative priority fee
 compute_unit_limit: 120000 # Standard compute unit limit
-    jito_tip_lamports: 0 # keep 0 to omit unless you know what you're doing
-    tip_account_b58: null # Jito tip account in base58 format
-    max_slippage_bps: 100 # 1% max slippage (conservative)
+jito_tip_lamports: 0 # No Jito tip for testing
+tip_account_b58: null # Jito tip account in base58 format
+max_slippage_bps: 50 # 0.5% max slippage (very conservative)
 
-# Risk management (conservative for production)
-position_size_usd: 50 # Start small and increase gradually
-daily_max_loss_usd: 200 # Conservative daily loss limit
-cooldown_seconds: 60 # 60 seconds between trades
+# Risk management (minimal amounts for testing)
+position_size_usd: 1.0 # Minimal amount for testing
+daily_max_loss_usd: 5.0 # Very conservative daily loss limit
+cooldown_seconds: 120 # 2 minutes between trades (longer for testing)
 
-# Notifications (REQUIRED for production)
+# Notifications (REQUIRED for testing)
 telegram_bot_token: '<token>' # REQUIRED: Set your Telegram bot token
 telegram_admin_ids: [123456789] # REQUIRED: Add admin Telegram user IDs
 
 # Data storage
-database_url: 'sqlite+aiosqlite:///./prod_bot.sqlite' # Consider PostgreSQL for production
-parquet_dir: './prod_data_parquet'
+database_url: 'sqlite+aiosqlite:///./minimal_test.sqlite' # Separate database for testing
+parquet_dir: './minimal_test_data_parquet'
 
 # Execution mode
-dry_run: false # Live trading in production
+dry_run: false # Live trading for minimal test
 
 # Live trading configuration
 preflight_simulate: true # Enable preflight simulation for live trades
@@ -44,6 +44,6 @@ keypair_path_enc: './secrets/solana-main.enc' # decrypted in-memory via secret_v
 keypair_path_json: null # alternative JSON keypair path
 external_signer_cmd: null # alternative signer command
 
-# Safety settings
+# Safety settings (strict for testing)
 allow_devnet: false # Never allow devnet in production
 unsafe_allow_high_slippage: false # Never allow high slippage in production

@@ -40,6 +40,9 @@ class AppSettings(BaseSettings):
         default=120000, description="Compute unit limit for transactions"
     )
     jito_tip_lamports: int = Field(default=0, description="Jito tip in lamports")
+    tip_account_b58: str | None = Field(
+        default=None, description="Jito tip account in base58 format"
+    )
     max_slippage_bps: int = Field(
         default=100, description="Maximum slippage in basis points"
     )
@@ -72,6 +75,22 @@ class AppSettings(BaseSettings):
 
     # Execution mode
     dry_run: bool = Field(default=True, description="Dry run mode (no real trades)")
+
+    # Live trading configuration
+    preflight_simulate: bool = Field(
+        default=True, description="Enable preflight simulation for live trades"
+    )
+    max_retries_send: int = Field(
+        default=3, description="Maximum retries for transaction sending"
+    )
+
+    # Safety settings
+    allow_devnet: bool = Field(
+        default=False, description="Allow trading on localhost/devnet (unsafe)"
+    )
+    unsafe_allow_high_slippage: bool = Field(
+        default=False, description="Allow slippage > 10% (unsafe)"
+    )
 
     model_config = {
         "env_file": ".env",

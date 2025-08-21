@@ -610,4 +610,138 @@ class TestPipelineIntegration:
         assert any("Trade Executed" in msg for msg in alerts.messages)
 
         # Check for token in alert message (first 8 chars)
-        assert any("TestToke" in msg for msg in alerts.messages)  # First 8 chars of token mint
+        assert any(
+            "TestToke" in msg for msg in alerts.messages
+        )  # First 8 chars of token mint
+
+
+class TestLiveTradingSafety:
+    """Tests for live trading safety validation."""
+
+    def test_live_trading_localhost_rpc_raises_error(self):
+        """Test that live trading with localhost RPC raises error."""
+        settings = MagicMock(spec=AppSettings)
+        settings.dry_run = False
+        settings.rpc_url = "http://localhost:8899"
+        settings.allow_devnet = False
+        settings.position_size_usd = 50.0
+        settings.daily_max_loss_usd = 200.0
+        settings.max_slippage_bps = 100
+
+        with pytest.raises(
+            ValueError, match="Live trading on localhost/devnet is not allowed"
+        ):
+            TradingPipeline(settings)
+
+    def test_live_trading_localhost_rpc_allowed_with_flag(self):
+        """Test that localhost RPC is allowed with allow_devnet flag."""
+        settings = MagicMock(spec=AppSettings)
+        settings.dry_run = False
+        settings.rpc_url = "http://localhost:8899"
+        settings.allow_devnet = True
+        settings.position_size_usd = 50.0
+        settings.daily_max_loss_usd = 200.0
+        settings.max_slippage_bps = 100
+        settings.cooldown_seconds = 60
+        settings.helius_api_key = None
+        settings.birdeye_api_key = None
+        settings.dexscreener_base = "https://api.dexscreener.com/latest/dex"
+        settings.jupiter_base = "https://quote-api.jup.ag/v6"
+        settings.priority_fee_microlamports = 0
+        settings.compute_unit_limit = 120000
+        settings.jito_tip_lamports = 0
+        settings.telegram_bot_token = None
+        settings.telegram_admin_ids = []
+        settings.database_url = "sqlite+aiosqlite:///./test.sqlite"
+        settings.parquet_dir = "./test_parquet"
+        settings.preflight_simulate = True
+        settings.max_retries_send = 3
+
+        # Should raise error due to missing signer config, but not due to localhost
+        with pytest.raises(ValueError, match="No valid signer configuration found"):
+            TradingPipeline(settings)
+
+    def test_live_trading_position_size_exceeds_daily_loss_raises_error(self):
+        """Test that position size exceeding daily loss raises error."""
+        settings = MagicMock(spec=AppSettings)
+        settings.dry_run = False
+        settings.rpc_url = "https://api.mainnet-beta.solana.com"
+        settings.allow_devnet = False
+        settings.position_size_usd = 300.0  # Exceeds daily max loss
+        settings.daily_max_loss_usd = 200.0
+        settings.max_slippage_bps = 100
+
+        with pytest.raises(
+            ValueError, match="Position size.*cannot exceed.*daily max loss"
+        ):
+            TradingPipeline(settings)
+
+    def test_live_trading_high_slippage_raises_error(self):
+        """Test that high slippage raises error without override."""
+        settings = MagicMock(spec=AppSettings)
+        settings.dry_run = False
+        settings.rpc_url = "https://api.mainnet-beta.solana.com"
+        settings.allow_devnet = False
+        settings.position_size_usd = 50.0
+        settings.daily_max_loss_usd = 200.0
+        settings.max_slippage_bps = 1500  # 15% - exceeds 10% limit
+        settings.unsafe_allow_high_slippage = False
+
+        with pytest.raises(ValueError, match="Slippage.*exceeds 10% limit"):
+            TradingPipeline(settings)
+
+    def test_live_trading_high_slippage_allowed_with_flag(self):
+        """Test that high slippage is allowed with override flag."""
+        settings = MagicMock(spec=AppSettings)
+        settings.dry_run = False
+        settings.rpc_url = "https://api.mainnet-beta.solana.com"
+        settings.allow_devnet = False
+        settings.position_size_usd = 50.0
+        settings.daily_max_loss_usd = 200.0
+        settings.max_slippage_bps = 1500  # 15% - exceeds 10% limit
+        settings.unsafe_allow_high_slippage = True
+        settings.cooldown_seconds = 60
+        settings.helius_api_key = None
+        settings.birdeye_api_key = None
+        settings.dexscreener_base = "https://api.dexscreener.com/latest/dex"
+        settings.jupiter_base = "https://quote-api.jup.ag/v6"
+        settings.priority_fee_microlamports = 0
+        settings.compute_unit_limit = 120000
+        settings.jito_tip_lamports = 0
+        settings.telegram_bot_token = None
+        settings.telegram_admin_ids = []
+        settings.database_url = "sqlite+aiosqlite:///./test.sqlite"
+        settings.parquet_dir = "./test_parquet"
+        settings.preflight_simulate = True
+        settings.max_retries_send = 3
+
+        # Should raise error due to missing signer config, but not due to high slippage
+        with pytest.raises(ValueError, match="No valid signer configuration found"):
+            TradingPipeline(settings)
+
+    def test_dry_run_bypasses_safety_checks(self):
+        """Test that dry run mode bypasses safety checks."""
+        settings = MagicMock(spec=AppSettings)
+        settings.dry_run = True
+        settings.rpc_url = "http://localhost:8899"  # Would fail in live mode
+        settings.allow_devnet = False
+        settings.position_size_usd = 300.0  # Would fail in live mode
+        settings.daily_max_loss_usd = 200.0
+        settings.max_slippage_bps = 1500  # Would fail in live mode
+        settings.unsafe_allow_high_slippage = False
+        settings.cooldown_seconds = 60
+        settings.helius_api_key = None
+        settings.birdeye_api_key = None
+        settings.dexscreener_base = "https://api.dexscreener.com/latest/dex"
+        settings.jupiter_base = "https://quote-api.jup.ag/v6"
+        settings.priority_fee_microlamports = 0
+        settings.compute_unit_limit = 120000
+        settings.jito_tip_lamports = 0
+        settings.telegram_bot_token = None
+        settings.telegram_admin_ids = []
+        settings.database_url = "sqlite+aiosqlite:///./test.sqlite"
+        settings.parquet_dir = "./test_parquet"
+
+        # Should not raise any safety validation errors in dry run mode
+        pipeline = TradingPipeline(settings)
+        assert pipeline.settings.dry_run is True
