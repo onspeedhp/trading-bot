@@ -1,6 +1,9 @@
 # Production configuration
 # Used for live trading - USE WITH EXTREME CAUTION
 
+# Environment
+env: "prod"
+
 # RPC and API endpoints
 rpc_url: "https://api.mainnet-beta.solana.com"  # Consider using Helius RPC for production
 helius_api_key: null  # REQUIRED: Set via environment variable HELIUS_API_KEY
@@ -29,4 +32,4 @@ database_url: "sqlite+aiosqlite:///./prod_bot.sqlite"  # Consider PostgreSQL for
 parquet_dir: "./prod_data_parquet"
 
 # Execution mode
-# dry_run will be automatically set to false for prod profile
+dry_run: false  # Live trading in production

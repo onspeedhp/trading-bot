@@ -118,9 +118,7 @@ class TestSQLiteStorage:
         """Test trade recording with default timestamp."""
         token_mint = "test_token"
 
-        before_time = datetime.now().timestamp()
         trade_id = await storage.record_trade(token_mint, "sell", 50.0, 1.6, 0.4)
-        after_time = datetime.now().timestamp()
 
         assert isinstance(trade_id, int)
         assert trade_id > 0

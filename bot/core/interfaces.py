@@ -1,6 +1,6 @@
 """Core interfaces for the trading bot."""
 
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from .types import FilterDecision, TokenId, TokenSnapshot
 
@@ -25,6 +25,7 @@ class Filter(Protocol):
         ...
 
 
+@runtime_checkable
 class RiskManager(Protocol):
     """Risk management protocol."""
 

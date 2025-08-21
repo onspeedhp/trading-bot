@@ -1,6 +1,9 @@
 # Paper trading configuration
 # Used for strategy testing with simulated trades
 
+# Environment
+env: "paper"
+
 # RPC and API endpoints
 rpc_url: "https://api.mainnet-beta.solana.com"
 helius_api_key: null  # Set via environment variable HELIUS_API_KEY
@@ -29,4 +32,4 @@ database_url: "sqlite+aiosqlite:///./paper_bot.sqlite"
 parquet_dir: "./paper_data_parquet"
 
 # Execution mode
-# dry_run will be automatically set to true for paper profile
+dry_run: true  # Always dry run in paper mode

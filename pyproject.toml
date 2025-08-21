@@ -31,7 +31,7 @@ solana = [
 ]
 
 [project.scripts]
-trading-bot = "bot.runner.pipeline:main"
+solbot = "bot.runner.pipeline:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["bot"]

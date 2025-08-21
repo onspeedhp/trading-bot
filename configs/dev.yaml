@@ -1,6 +1,9 @@
 # Development configuration
 # Used for local development and testing
 
+# Environment
+env: "dev"
+
 # RPC and API endpoints
 rpc_url: "https://api.devnet.solana.com"
 helius_api_key: null  # Set via environment variable HELIUS_API_KEY

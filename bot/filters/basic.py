@@ -1,73 +1,71 @@
 """Basic trading filters."""
 
-from typing import Optional
-from decimal import Decimal
 import structlog
 
 from ..core.interfaces import Filter
-from ..core.types import TradeSignal, MarketData
+from ..core.types import FilterDecision, TokenSnapshot
 
 logger = structlog.get_logger(__name__)
 
 
-class VolumeFilter(Filter):
-    """Filter based on trading volume."""
+class BasicFilter(Filter):
+    """Basic filter that implements common trading criteria."""
 
-    def __init__(self, min_volume_usd: Decimal = Decimal("10000")) -> None:
-        """Initialize volume filter."""
+    def __init__(
+        self,
+        min_volume_usd: float = 10000.0,
+        min_liquidity_usd: float = 50000.0,
+        min_holders: int = 100,
+        min_age_seconds: int = 1800,  # 30 minutes
+    ) -> None:
+        """Initialize basic filter."""
         self.min_volume_usd = min_volume_usd
-
-    async def should_trade(self, signal: TradeSignal) -> bool:
-        """Check if trade meets volume requirements."""
-        # This would check actual volume data
-        # For now, return True as placeholder
-        logger.info("Volume filter check", signal=signal.token_address)
-        return True
-
-    async def filter_signal(self, signal: TradeSignal) -> Optional[TradeSignal]:
-        """Filter signal based on volume."""
-        if await self.should_trade(signal):
-            return signal
-        return None
-
-
-class PriceChangeFilter(Filter):
-    """Filter based on price change percentage."""
-
-    def __init__(self, max_change_percent: float = 50.0) -> None:
-        """Initialize price change filter."""
-        self.max_change_percent = max_change_percent
-
-    async def should_trade(self, signal: TradeSignal) -> bool:
-        """Check if trade meets price change requirements."""
-        # This would check actual price change data
-        # For now, return True as placeholder
-        logger.info("Price change filter check", signal=signal.token_address)
-        return True
-
-    async def filter_signal(self, signal: TradeSignal) -> Optional[TradeSignal]:
-        """Filter signal based on price change."""
-        if await self.should_trade(signal):
-            return signal
-        return None
-
-
-class LiquidityFilter(Filter):
-    """Filter based on liquidity requirements."""
-
-    def __init__(self, min_liquidity_usd: Decimal = Decimal("50000")) -> None:
-        """Initialize liquidity filter."""
         self.min_liquidity_usd = min_liquidity_usd
+        self.min_holders = min_holders
+        self.min_age_seconds = min_age_seconds
 
-    async def should_trade(self, signal: TradeSignal) -> bool:
-        """Check if trade meets liquidity requirements."""
-        # This would check actual liquidity data
-        # For now, return True as placeholder
-        logger.info("Liquidity filter check", signal=signal.token_address)
-        return True
+    def evaluate(self, snap: TokenSnapshot) -> FilterDecision:
+        """Evaluate token snapshot against basic criteria."""
+        reasons = []
+        score = 1.0
 
-    async def filter_signal(self, signal: TradeSignal) -> Optional[TradeSignal]:
-        """Filter signal based on liquidity."""
-        if await self.should_trade(signal):
-            return signal
-        return None
+        # Check volume
+        if snap.vol_5m_usd < self.min_volume_usd:
+            reasons.append(
+                f"Volume too low: ${snap.vol_5m_usd:.2f} < ${self.min_volume_usd:.2f}"
+            )
+            score -= 0.3
+
+        # Check liquidity
+        if snap.liq_usd < self.min_liquidity_usd:
+            reasons.append(
+                f"Liquidity too low: ${snap.liq_usd:.2f} < ${self.min_liquidity_usd:.2f}"
+            )
+            score -= 0.4
+
+        # Check holders
+        if snap.holders is not None and snap.holders < self.min_holders:
+            reasons.append(f"Too few holders: {snap.holders} < {self.min_holders}")
+            score -= 0.2
+
+        # Check age
+        if snap.age_seconds is not None and snap.age_seconds < self.min_age_seconds:
+            reasons.append(
+                f"Token too new: {snap.age_seconds}s < {self.min_age_seconds}s"
+            )
+            score -= 0.1
+
+        accepted = score >= 0.5 and len(reasons) == 0
+
+        if accepted:
+            reasons.append("Passed basic criteria")
+
+        logger.debug(
+            "Basic filter evaluation",
+            token_mint=snap.token.mint,
+            accepted=accepted,
+            score=score,
+            reasons=reasons,
+        )
+
+        return FilterDecision(accepted=accepted, score=score, reasons=reasons)
