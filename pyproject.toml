@@ -8,9 +8,7 @@ version = "0.1.0"
 description = "Solana trading bot with paper trading capabilities"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
-authors = [
-    {name = "Trading Bot Developer", email = "dev@example.com"},
-]
+authors = [{ name = "Trading Bot Developer", email = "chaukhac4@gmsil.com" }]
 dependencies = [
     "httpx[http2]==0.27.*",
     "pydantic==2.*",
@@ -25,14 +23,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-live = [
-    "solders==0.20.*",
-    "solana==0.30.*",
-    "base58==2.1.*",
-    "pynacl==1.5.*",
-    # Note: These packages may conflict with httpx version requirements
-    # You may need to manually resolve dependencies or use a separate environment
-]
+live = ["solders==0.20.*", "solana==0.30.*", "base58==2.1.*", "pynacl==1.5.*"]
 
 [project.scripts]
 solbot = "bot.runner.pipeline:main"
@@ -56,10 +47,7 @@ warn_unreachable = true
 strict_equality = true
 
 [[tool.mypy.overrides]]
-module = [
-    "cryptography.*",
-    "prometheus_client.*",
-]
+module = ["cryptography.*", "prometheus_client.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
@@ -75,9 +63,9 @@ select = [
     "UP", # pyupgrade
 ]
 ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
 ]
 
 [tool.ruff.per-file-ignores]

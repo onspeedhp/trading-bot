@@ -19,7 +19,7 @@ A production-ready Solana trading bot with paper trading capabilities, built wit
 ## Features
 
 - Paper trading mode for safe testing
-- Real-time data feeds from Helius, Birdeye, and DexScreener
+- Real-time data feeds from Helius, and DexScreener
 - Configurable risk management
 - Telegram alerts
 - Prometheus metrics
@@ -163,14 +163,12 @@ The Solana packages require `httpx<0.24.0`, but this project uses `httpx==0.27.*
    dry_run: false # Enable live trading
    rpc_url: 'https://your-rpc-endpoint.com' # Use reliable RPC
    helius_api_key: 'your_helius_key' # Required for data
-   birdeye_api_key: 'your_birdeye_key' # Required for data
    ```
 
 4. **Set environment variables:**
 
    ```bash
    export HELIUS_API_KEY="your_helius_key"
-   export BIRDEYE_API_KEY="your_birdeye_key"
    export TELEGRAM_BOT_TOKEN="your_bot_token"
    ```
 
@@ -203,7 +201,7 @@ The JupiterExecutor requires:
 2. **🧪 Test Configuration**
 
    - [ ] Run paper trading mode first (`dry_run: true`)
-   - [ ] Verify all data sources are working (Helius, Birdeye)
+   - [ ] Verify all data sources are working (Helius)
    - [ ] Test Telegram alerts are functioning
    - [ ] Confirm risk management settings are appropriate
 
@@ -275,7 +273,7 @@ make test      # Run tests
 bot/
 ├── config/          # Configuration management
 ├── core/            # Core types and interfaces
-├── data/            # Data providers (Helius, Birdeye, DexScreener)
+├── data/            # Data providers (Helius, DexScreener)
 ├── filters/         # Trading filters and heuristics
 ├── risk/            # Risk management
 ├── exec/            # Execution engines (paper, Jupiter)
@@ -297,7 +295,6 @@ The bot uses YAML configuration files:
 Key environment variables:
 
 - `HELIUS_API_KEY` - Helius API key for data feeds
-- `BIRDEYE_API_KEY` - Birdeye API key for market data
 - `TELEGRAM_BOT_TOKEN` - Telegram bot token for notifications
 
 ## Docker

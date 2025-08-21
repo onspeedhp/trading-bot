@@ -7,8 +7,6 @@ env: 'prod'
 # RPC and API endpoints
 rpc_url: '<YOUR_HELIUS_OR_HIGH_QUALITY_RPC>' # Use Helius or other high-quality RPC
 helius_api_key: null # REQUIRED: Set via environment variable HELIUS_API_KEY
-birdeye_api_key: null # REQUIRED: Set via environment variable BIRDEYE_API_KEY
-dexscreener_base: 'https://api.dexscreener.com/latest/dex'
 jupiter_base: 'https://quote-api.jup.ag/v6'
 gmgn_base: null # Optional GMGN API for additional data
 

@@ -7,7 +7,6 @@ env: "dev"
 # RPC and API endpoints
 rpc_url: "https://api.devnet.solana.com"
 helius_api_key: null  # Set via environment variable HELIUS_API_KEY
-birdeye_api_key: null  # Set via environment variable BIRDEYE_API_KEY
 dexscreener_base: "https://api.dexscreener.com/latest/dex"
 jupiter_base: "https://quote-api.jup.ag/v6"
 gmgn_base: null  # Optional GMGN API for additional data

@@ -15,18 +15,12 @@ class AppSettings(BaseSettings):
     """Application settings with environment variable support."""
 
     # Environment and mode
-    env: Literal["dev", "paper", "prod"] = Field(
-        description="Environment: dev, paper, prod"
+    env: Literal["dev", "paper", "prod", "fetch"] = Field(
+        description="Environment: dev, paper, prod, fetch"
     )
 
     # RPC and API endpoints
     rpc_url: str = Field(description="Solana RPC URL")
-    helius_api_key: str | None = Field(default=None, description="Helius API key")
-    birdeye_api_key: str | None = Field(default=None, description="Birdeye API key")
-    dexscreener_base: str = Field(
-        default="https://api.dexscreener.com/latest/dex",
-        description="DexScreener API base URL",
-    )
     jupiter_base: str = Field(
         default="https://quote-api.jup.ag/v6", description="Jupiter API base URL"
     )
@@ -115,9 +109,9 @@ def load_settings(profile: str, yaml_path: str) -> AppSettings:
         ValidationError: If configuration is invalid
         ValueError: If profile is invalid
     """
-    if profile not in ["dev", "paper", "prod"]:
+    if profile not in ["dev", "paper", "prod", "fetch"]:
         raise ValueError(
-            f"Invalid profile: {profile}. Must be one of: dev, paper, prod"
+            f"Invalid profile: {profile}. Must be one of: dev, paper, prod, fetch"
         )
 
     yaml_file = Path(yaml_path)
@@ -137,6 +131,8 @@ def load_settings(profile: str, yaml_path: str) -> AppSettings:
             yaml_config["dry_run"] = True
         elif profile == "prod":
             yaml_config["dry_run"] = False
+        elif profile == "fetch":
+            yaml_config["dry_run"] = True
         # dev profile dry_run is set in YAML
 
         logger.info("Loading configuration", profile=profile, yaml_path=yaml_path)

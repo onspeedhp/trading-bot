@@ -1,4 +1,4 @@
-.PHONY: help lint format typecheck test run-paper clean install
+.PHONY: help lint format typecheck test run-paper clean install fetch
 
 help: ## Show this help message
 	@echo "Available commands:"
@@ -20,7 +20,10 @@ test: ## Run tests with pytest
 	pytest -q tests/
 
 run-paper: ## Run the bot in paper trading mode
-	python -m bot.runner.pipeline --mode paper
+	source venv/bin/activate && python -m bot.runner.pipeline --config configs/paper.yaml --profile paper
+
+fetch: ## Fetch data from configured sources
+	python -m scripts.fetch_only --config configs/fetch.yaml --profile prod
 
 clean: ## Clean up build artifacts
 	rm -rf build/

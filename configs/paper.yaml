@@ -5,10 +5,8 @@
 env: "paper"
 
 # RPC and API endpoints
-rpc_url: "https://api.mainnet-beta.solana.com"
-helius_api_key: null  # Set via environment variable HELIUS_API_KEY
-birdeye_api_key: null  # Set via environment variable BIRDEYE_API_KEY
-dexscreener_base: "https://api.dexscreener.com/latest/dex"
+rpc_url: "https://mainnet.helius-rpc.com/?api-key=dd3e31d8-fbf3-465c-9dd1-ce8d2a4edd70"
+# Jupiter API doesn't require API key - used for all data fetching
 jupiter_base: "https://quote-api.jup.ag/v6"
 gmgn_base: null  # Optional GMGN API for additional data
 

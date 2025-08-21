@@ -5,7 +5,7 @@
 ## 1. Dry-Run Validation
 
 ### Pre-Flight Checklist
-- [ ] All API keys configured (Helius, Birdeye, Telegram)
+- [ ] All API keys configured (Helius, Telegram)
 - [ ] RPC endpoint tested and responsive
 - [ ] Encrypted keypair file ready
 - [ ] Telegram bot token and admin IDs set
@@ -34,7 +34,6 @@ solbot --config configs/validation.yaml --profile validation
 ```bash
 # Check logs for:
 # - Helius data polling
-# - Birdeye price feeds
 # - DexScreener lookups
 # - All sources returning valid data
 ```

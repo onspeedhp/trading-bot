@@ -1,0 +1,28 @@
+env: 'prod'
+dry_run: true
+
+# --- RPC / APIs ---
+rpc_url: 'https://mainnet.helius-rpc.com/?api-key=dd3e31d8-fbf3-465c-9dd1-ce8d2a4edd70'
+helius_api_key: 'dd3e31d8-fbf3-465c-9dd1-ce8d2a4edd70'
+dexscreener_base: 'https://api.dexscreener.com'
+jupiter_base: 'https://quote-api.jup.ag/v6'
+
+# --- Risk / execution irrelevant in fetch-only but must be valid ---
+position_size_usd: 1
+daily_max_loss_usd: 5
+max_slippage_bps: 100
+cooldown_seconds: 60
+
+# --- Compute/fees unused in fetch-only (left as defaults) ---
+compute_unit_limit: 120000
+priority_fee_microlamports: 0
+jito_tip_lamports: 0
+
+# --- Safety flags (kept strict even though dry_run is true) ---
+preflight_simulate: true
+allow_devnet: false
+unsafe_allow_high_slippage: false
+
+# --- Alerts off for this profile ---
+telegram_bot_token: null
+telegram_admin_ids: []

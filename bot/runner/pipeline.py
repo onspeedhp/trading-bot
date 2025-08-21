@@ -15,9 +15,7 @@ from ..core.interfaces import (
     AlertSink,
 )
 from ..core.types import TokenSnapshot
-from ..data.birdeye import BirdeyeDataSource
-from ..data.dexscreener import DexScreenerLookup
-from ..data.helius import HeliusDataSource
+from ..data.jupiter import JupiterDataSource
 from ..exec.jupiter import JupiterExecutor
 from ..exec.paper import PaperExecutor
 from ..exec.senders import RpcSender
@@ -117,28 +115,16 @@ class TradingPipeline:
         """
         components = {}
 
-        # Data sources
+        # Jupiter data source manages its own HTTP client
+
+        # Data sources - only Jupiter
         data_sources = []
 
-        if settings.helius_api_key:
-            data_sources.append(
-                HeliusDataSource(
-                    rpc_url=settings.rpc_url, api_key=settings.helius_api_key
-                )
-            )
-            logger.info("Added Helius data source")
-        else:
-            logger.warning("Helius API key not provided, skipping Helius data source")
-
-        if settings.birdeye_api_key:
-            data_sources.append(BirdeyeDataSource(api_key=settings.birdeye_api_key))
-            logger.info("Added Birdeye data source")
-        else:
-            logger.warning("Birdeye API key not provided, skipping Birdeye data source")
-
-        # Always add DexScreener as lookup source
-        data_sources.append(DexScreenerLookup(base_url=settings.dexscreener_base))
-        logger.info("Added DexScreener lookup source")
+        # Add Jupiter data source (no API key required)
+        data_sources.append(
+            JupiterDataSource(base_url="https://lite-api.jup.ag", limit=10)
+        )
+        logger.info("Added Jupiter data source")
 
         components["data_sources"] = data_sources
 
@@ -460,6 +446,11 @@ class TradingPipeline:
         # Close storage
         if "storage" in self.components:
             await self.components["storage"].close()
+
+        # Close data sources
+        for data_source in self.components.get("data_sources", []):
+            if hasattr(data_source, "close"):
+                await data_source.close()
 
 
 async def main() -> None:

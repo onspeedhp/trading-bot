@@ -5,19 +5,17 @@
 env: 'prod'
 
 # RPC and API endpoints
-rpc_url: '<YOUR_HELIUS_OR_HIGH_QUALITY_RPC>' # Use Helius or other high-quality RPC
-helius_api_key: null # REQUIRED: Set via environment variable HELIUS_API_KEY
-birdeye_api_key: null # REQUIRED: Set via environment variable BIRDEYE_API_KEY
-dexscreener_base: 'https://api.dexscreener.com/latest/dex'
+rpc_url: 'https://mainnet.helius-rpc.com/?api-key=dd3e31d8-fbf3-465c-9dd1-ce8d2a4edd70'
+helius_api_key: 'dd3e31d8-fbf3-465c-9dd1-ce8d2a4edd70'
 jupiter_base: 'https://quote-api.jup.ag/v6'
 gmgn_base: null # Optional GMGN API for additional data
 
 # Transaction settings (optimized for production)
 priority_fee_microlamports: 20000 # example - adjust based on network conditions
 compute_unit_limit: 120000 # Standard compute unit limit
-    jito_tip_lamports: 0 # keep 0 to omit unless you know what you're doing
-    tip_account_b58: null # Jito tip account in base58 format
-    max_slippage_bps: 100 # 1% max slippage (conservative)
+jito_tip_lamports: 0 # keep 0 to omit unless you know what you're doing
+tip_account_b58: null # Jito tip account in base58 format
+max_slippage_bps: 100 # 1% max slippage (conservative)
 
 # Risk management (conservative for production)
 position_size_usd: 50 # Start small and increase gradually

@@ -15,9 +15,7 @@ def test_app_settings_defaults() -> None:
 
     assert settings.env == "dev"
     assert settings.rpc_url == "https://api.devnet.solana.com"
-    assert settings.helius_api_key is None
-    assert settings.birdeye_api_key is None
-    assert settings.dexscreener_base == "https://api.dexscreener.com/latest/dex"
+    # Jupiter API doesn't require API keys
     assert settings.jupiter_base == "https://quote-api.jup.ag/v6"
     assert settings.gmgn_base is None
     assert settings.priority_fee_microlamports == 0
@@ -39,7 +37,7 @@ def test_app_settings_custom_values() -> None:
     settings = AppSettings(
         env="prod",
         rpc_url="https://api.mainnet-beta.solana.com",
-        helius_api_key="test_key",
+        # Jupiter API doesn't require API keys
         position_size_usd=1000.0,
         daily_max_loss_usd=500.0,
         telegram_admin_ids=[123456789],
@@ -48,7 +46,7 @@ def test_app_settings_custom_values() -> None:
 
     assert settings.env == "prod"
     assert settings.rpc_url == "https://api.mainnet-beta.solana.com"
-    assert settings.helius_api_key == "test_key"
+            # Jupiter API doesn't require API keys
     assert settings.position_size_usd == 1000.0
     assert settings.daily_max_loss_usd == 500.0
     assert settings.telegram_admin_ids == [123456789]
@@ -71,8 +69,7 @@ def test_load_settings_dev_profile() -> None:
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
         f.write("""
             rpc_url: "https://api.devnet.solana.com"
-            helius_api_key: null
-            birdeye_api_key: null
+            # Jupiter API doesn't require API keys
             position_size_usd: 10.0
             daily_max_loss_usd: 50.0
             cooldown_seconds: 120
@@ -89,7 +86,7 @@ def test_load_settings_dev_profile() -> None:
 
         assert settings.env == "dev"
         assert settings.rpc_url == "https://api.devnet.solana.com"
-        assert settings.helius_api_key is None
+        # Jupiter API doesn't require API keys
         assert settings.position_size_usd == 10.0
         assert settings.daily_max_loss_usd == 50.0
         assert settings.cooldown_seconds == 120
@@ -105,8 +102,7 @@ def test_load_settings_paper_profile() -> None:
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
         f.write("""
             rpc_url: "https://api.mainnet-beta.solana.com"
-            helius_api_key: null
-            birdeye_api_key: null
+            # Jupiter API doesn't require API keys
             position_size_usd: 100.0
             daily_max_loss_usd: 200.0
             cooldown_seconds: 60
@@ -139,8 +135,7 @@ def test_load_settings_prod_profile() -> None:
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
         f.write("""
             rpc_url: "https://api.mainnet-beta.solana.com"
-            helius_api_key: null
-            birdeye_api_key: null
+            # Jupiter API doesn't require API keys
             position_size_usd: 500.0
             daily_max_loss_usd: 1000.0
             cooldown_seconds: 30

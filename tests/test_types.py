@@ -69,7 +69,7 @@ def test_token_snapshot_creation() -> None:
         holders=1000,
         age_seconds=86400,
         pct_change_5m=2.5,
-        source="birdeye",
+        source="jupiter",
         ts=datetime.utcnow(),
     )
 
@@ -81,7 +81,7 @@ def test_token_snapshot_creation() -> None:
     assert snapshot.holders == 1000
     assert snapshot.age_seconds == 86400
     assert snapshot.pct_change_5m == 2.5
-    assert snapshot.source == "birdeye"
+    assert snapshot.source == "jupiter"
     assert isinstance(snapshot.ts, datetime)
 
 
@@ -94,7 +94,7 @@ def test_token_snapshot_optional_fields() -> None:
         price_usd=1.0,
         liq_usd=1000000.0,
         vol_5m_usd=50000.0,
-        source="dexscreener",
+        source="jupiter",
         ts=datetime.utcnow(),
     )
 
@@ -205,7 +205,7 @@ def test_json_serialization_token_snapshot() -> None:
         holders=1000,
         age_seconds=86400,
         pct_change_5m=2.5,
-        source="birdeye",
+        source="jupiter",
         ts=datetime(2023, 1, 1, 12, 0, 0),
     )
 
@@ -300,7 +300,7 @@ def test_complex_nested_serialization() -> None:
         holders=1000,
         age_seconds=86400,
         pct_change_5m=2.5,
-        source="birdeye",
+        source="jupiter",
         ts=datetime(2023, 1, 1, 12, 0, 0),
     )
 
