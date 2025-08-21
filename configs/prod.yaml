@@ -1,0 +1,32 @@
+# Production configuration
+# Used for live trading - USE WITH EXTREME CAUTION
+
+# RPC and API endpoints
+rpc_url: "https://api.mainnet-beta.solana.com"  # Consider using Helius RPC for production
+helius_api_key: null  # REQUIRED: Set via environment variable HELIUS_API_KEY
+birdeye_api_key: null  # REQUIRED: Set via environment variable BIRDEYE_API_KEY
+dexscreener_base: "https://api.dexscreener.com/latest/dex"
+jupiter_base: "https://quote-api.jup.ag/v6"
+gmgn_base: null  # Optional GMGN API for additional data
+
+# Transaction settings (optimized for production)
+priority_fee_microlamports: 10000  # 0.01 SOL priority fee for faster execution
+compute_unit_limit: 120000  # Standard compute unit limit
+jito_tip_lamports: 50000  # 0.05 SOL Jito tip for MEV protection
+max_slippage_bps: 100  # 1% max slippage (conservative)
+
+# Risk management (conservative for production)
+position_size_usd: 500.0  # Larger position size for production
+daily_max_loss_usd: 1000.0  # Higher daily loss limit
+cooldown_seconds: 30  # 30 seconds between trades
+
+# Notifications (REQUIRED for production)
+telegram_bot_token: null  # REQUIRED: Set via environment variable TELEGRAM_BOT_TOKEN
+telegram_admin_ids: []  # REQUIRED: Add admin Telegram user IDs
+
+# Data storage
+database_url: "sqlite+aiosqlite:///./prod_bot.sqlite"  # Consider PostgreSQL for production
+parquet_dir: "./prod_data_parquet"
+
+# Execution mode
+# dry_run will be automatically set to false for prod profile

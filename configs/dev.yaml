@@ -1,0 +1,32 @@
+# Development configuration
+# Used for local development and testing
+
+# RPC and API endpoints
+rpc_url: "https://api.devnet.solana.com"
+helius_api_key: null  # Set via environment variable HELIUS_API_KEY
+birdeye_api_key: null  # Set via environment variable BIRDEYE_API_KEY
+dexscreener_base: "https://api.dexscreener.com/latest/dex"
+jupiter_base: "https://quote-api.jup.ag/v6"
+gmgn_base: null  # Optional GMGN API for additional data
+
+# Transaction settings (conservative for development)
+priority_fee_microlamports: 1000  # 0.001 SOL priority fee
+compute_unit_limit: 200000  # Higher limit for development
+jito_tip_lamports: 0  # No Jito tips in development
+max_slippage_bps: 200  # 2% max slippage
+
+# Risk management (very conservative for development)
+position_size_usd: 10.0  # Small position size for testing
+daily_max_loss_usd: 50.0  # Low daily loss limit
+cooldown_seconds: 120  # 2 minutes between trades
+
+# Notifications (optional for development)
+telegram_bot_token: null  # Set via environment variable TELEGRAM_BOT_TOKEN
+telegram_admin_ids: []  # Add your Telegram user ID for notifications
+
+# Data storage
+database_url: "sqlite+aiosqlite:///./dev_bot.sqlite"
+parquet_dir: "./dev_data_parquet"
+
+# Execution mode
+dry_run: true  # Always dry run in development
